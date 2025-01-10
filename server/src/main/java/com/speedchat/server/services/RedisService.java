@@ -25,5 +25,6 @@ public class RedisService {
         RMap<String, String> rMap = redissonClient.getMap(mapName);
         return rMap.get(key);
     }
+
 }
 
