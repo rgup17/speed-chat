@@ -5,22 +5,25 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+/**
+ * Maps user to its chatrooms
+ */
+
 @Entity
+@Table(name = "user_chatroom")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users")
-public class User {
+public class UserChatroom {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long mapId;
     private Long userId;
+    private Long roomId;
 
-    private String username;
-
-    private String email;
-
-    public User(String username, String email) {
-        this.username = username;
-        this.email = email;
+    public UserChatroom(Long userId, Long roomId) {
+        this.userId = userId;
+        this.roomId = roomId;
     }
 }
