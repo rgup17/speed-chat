@@ -20,8 +20,9 @@ public class User {
 
     @Column(name = "email")
     private String email;
-    public User(String userName, String userEmail) {
-        this.username = userName;
-        this.email = userEmail;
+
+    public User(String username, String email) {
+        this.username = username;
+        this.email = email;
     }
 }

@@ -6,11 +6,11 @@ import com.speedchat.server.utils.EmailManager;
 import com.speedchat.server.utils.TokenManager;
 import io.jsonwebtoken.Claims;
 import jakarta.mail.MessagingException;
-import netscape.javascript.JSObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +25,9 @@ public class AuthenticationService {
     private final EmailManager emailManager;
     private final TokenManager tokenManager;
     private final UserRepository userRepository;
+
+    private final Logger LOGGER = LogManager.getLogger(AuthenticationService.class);
+
 
     public AuthenticationService(RedissonClient redissonClient, EmailManager emailManager, TokenManager tokenManager, UserRepository userRepository) {
         this.redissonClient = redissonClient;
@@ -68,10 +71,13 @@ public class AuthenticationService {
         User user = userRepository.findUserByEmail(emailAddress);
         Map<String, Object> response = new HashMap<>();
         if (user == null) {
+            LOGGER.info("User with email address {} does not exist", emailAddress);
             type = "N";
             userRepository.save(new User("", emailAddress));
+            LOGGER.info("Created a new user for {}", emailAddress);
         }
         else {
+            LOGGER.info("User with email address {} already exists", emailAddress);
             response.put("accessToken", tokenManager.generateJWTToken(user));
             response.put("user", user);
         }
@@ -108,11 +114,13 @@ public class AuthenticationService {
     public void saveOTPToRedis(String hash, String key, Object value) {
         RMap<String, Object> rmap = redissonClient.getMap(hash);
         rmap.put(key, value);
+        LOGGER.info("Successfully saved OTP To Redis");
     }
 
     public void deleteOTPFromRedis(String hash, String key) {
         RMap<String, Object> rmap = redissonClient.getMap(hash);
         rmap.remove(key);
+        LOGGER.info("Successfully removed OTP from Redis");
     }
 
 
