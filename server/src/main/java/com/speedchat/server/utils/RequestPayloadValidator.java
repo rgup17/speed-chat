@@ -35,6 +35,32 @@ public class RequestPayloadValidator {
         if(!matcher.matches()) throw new InvalidRequestBodyException("Invalid Email Address");
     }
 
+    public void deactivateChatroomValidation(Map<String, Object> body) throws InvalidRequestBodyException {
+        if(!body.containsKey("roomId")) throw new InvalidRequestBodyException("roomId is required in request body");
+        try {
+            ((Number) body.get("roomId")).longValue();
+        } catch(Exception e) {
+            throw new InvalidRequestBodyException(e.getMessage());
+        }
+    }
+
+    public void inviteUserByEmailValidation(Map<String, Object> body) throws InvalidRequestBodyException {
+        if(!body.containsKey("recipientEmail")) throw new InvalidRequestBodyException("recipientEmail is required in request body");
+        validateEmail((String) body.get("recipientEmail"));
+        this.deactivateChatroomValidation(body);
+    }
+
+    public void updateInviteValidation(Map<String, Object> body) throws InvalidRequestBodyException {
+        if(!body.containsKey("inviteId")) throw new InvalidRequestBodyException("inviteId is required field");
+        if(!body.containsKey("inviteStatus")) throw new InvalidRequestBodyException("inviteStatus is required field");
+
+        try {
+            ((Number) body.get("inviteId")).longValue();
+        } catch(Exception e) {
+            throw new InvalidRequestBodyException(e.getMessage());
+        }
+    }
+
     public static class InvalidRequestBodyException extends Exception {
         public InvalidRequestBodyException(String message) {
             super(message);
