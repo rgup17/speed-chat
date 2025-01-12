@@ -27,4 +27,6 @@ public interface UserChatroomRepository extends JpaRepository<UserChatroom, Long
         """, nativeQuery = true)
     List<ParticipantDTO> findParticipantsByRoomId(@Param("roomId") Long roomId);
 
+    UserChatroom findByUserIdAndRoomId(@Param("userId") Long userId, @Param("roomId") Long roomId);
+
 }
