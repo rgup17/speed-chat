@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.util.Pair;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -111,6 +112,7 @@ public class AuthenticationService {
         return userData;
     }
 
+    @Async("cachedThreadPool")
     public void saveOTPToRedis(String hash, String key, Object value) {
         RMap<String, Object> rmap = redissonClient.getMap(hash);
         rmap.put(key, value);
