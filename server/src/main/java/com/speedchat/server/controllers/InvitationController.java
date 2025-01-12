@@ -39,7 +39,7 @@ public class InvitationController {
         return ResponseEntity.status(responsePayload.getHttpStatus()).body(responsePayload);
     }
 
-    @GetMapping("/received-invitations/{inviteStatus")
+    @GetMapping("/received-invitations/{inviteStatus}")
     public ResponseEntity<ResponsePayload> getReceivedInvitations(@PathVariable String inviteStatus, HttpServletRequest request) {
         JSONObject userData = (JSONObject) request.getAttribute("userData");
         ResponsePayload responsePayload;
@@ -59,7 +59,7 @@ public class InvitationController {
         ResponsePayload responsePayload;
         try {
             requestPayloadValidator.inviteUserByEmailValidation(body);
-            invitationService.inviteUserByEmail(userData.getLong("userId"), (String) body.get("recipientEmail"), (Long) body.get("roomId") );
+            invitationService.inviteUserByEmail(userData.getLong("userId"), (String) body.get("recipientEmail"), ((Number) body.get("roomId")).longValue());
             responsePayload = new ResponsePayload(HttpStatus.OK, "Successfully invited " + (String) body.get("recipientEmail"), null);
         } catch (Exception e) {
             LOGGER.info(e.getMessage());

@@ -61,27 +61,33 @@ public class AuthenticationService {
      */
     public Pair<Object, String> verifyOTP(String emailAddress, String OTP) throws Exception {
         String otpInRedis = (String) redissonClient.getMap("OTP_HASH").get(emailAddress);
-        if (otpInRedis == null) return null;
+        if (otpInRedis == null) {
+            throw new Exception("OTP expired or invalid.");
+        }
+
         boolean otpIsCorrect = OTP.equals(otpInRedis);
         if (!otpIsCorrect) {
             throw new Exception("OTP Verification failed. OTP is expired/invalid. Please request a new OTP to verify your email.");
         }
-        deleteOTPFromRedis("OTP_HASH", emailAddress);
 
-        String type =  "E";
+        deleteOTPFromRedis("OTP_HASH", emailAddress);
+        String type = "E";  // Existing User by default
         User user = userRepository.findUserByEmail(emailAddress);
         Map<String, Object> response = new HashMap<>();
+
         if (user == null) {
-            LOGGER.info("User with email address {} does not exist", emailAddress);
-            type = "N";
-            userRepository.save(new User("", emailAddress));
-            LOGGER.info("Created a new user for {}", emailAddress);
+            LOGGER.info("User with email address {} does not exist, creating new user.", emailAddress);
+            user = new User("", emailAddress); // Creating a new user
+            userRepository.save(user);
+            type = "N"; // New User
         }
-        else {
-            LOGGER.info("User with email address {} already exists", emailAddress);
-            response.put("accessToken", tokenManager.generateJWTToken(user));
-            response.put("user", user);
-        }
+
+        // Generate access token for both new and existing users
+        String accessToken = tokenManager.generateJWTToken(user);
+        response.put("accessToken", accessToken);
+        response.put("user", user);
+
+        LOGGER.info("OTP verified successfully for {}", emailAddress);
         return Pair.of(response, type);
     }
 

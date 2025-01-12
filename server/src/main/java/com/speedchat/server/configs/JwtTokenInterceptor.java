@@ -30,7 +30,8 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
         ResponsePayload responsePayload = new ResponsePayload();
 
         try {
-            if(token == null) throw new Exception("Access token is not present");
+            if(token == null || token.trim().isEmpty()) throw new Exception("Access token is not present");
+            token = token.trim().replaceFirst("(?i)^Bearer ", "");  // Removing the prefix safely
             JSONObject userData = authService.validateUserToken(token);
 
             if(userData.getBoolean("isAuthenticated")) {

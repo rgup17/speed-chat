@@ -23,6 +23,25 @@ public class RequestPayloadValidator {
         if (OTP == null || OTP.length() != 6 || !OTP.matches("\\d{6}")) throw new InvalidRequestBodyException("Invalid OTP sent");
     }
 
+    public void createChatroomValidation(Map<String, Object> body) throws InvalidRequestBodyException {
+        if(!body.containsKey("roomName")) throw new InvalidRequestBodyException("roomName is required in request body");
+    }
+
+    public void updateChatroomValidation(Map<String, Object> body) throws InvalidRequestBodyException {
+        if(!body.containsKey("roomId")) throw new InvalidRequestBodyException("roomId is required in request body");
+        if(!body.containsKey("roomName")) throw new InvalidRequestBodyException("roomName is required in request body");
+
+        try {
+            Long roomId = ((Number) body.get("roomId")).longValue();
+            String roomName = (String) body.get("roomName");
+
+            if(roomName == null || roomName.length() == 0) throw new InvalidRequestBodyException("Invalid roomName passed!");
+        } catch(Exception e) {
+            throw new InvalidRequestBodyException(e.getMessage());
+        }
+    }
+
+
     public void saveUsernameValidation(Map<String, Object> body) throws InvalidRequestBodyException {
         if (!body.containsKey("username")) throw new InvalidRequestBodyException("username is required in request body");
         String username = (String) body.get("username");
@@ -60,6 +79,7 @@ public class RequestPayloadValidator {
             throw new InvalidRequestBodyException(e.getMessage());
         }
     }
+
 
     public static class InvalidRequestBodyException extends Exception {
         public InvalidRequestBodyException(String message) {

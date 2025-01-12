@@ -61,8 +61,8 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE invitation SET invite_status = :newInviteStatus" +
-            " WHERE invite_id = :inviteId AND recipient_user_id = :recipientUserId")
+    @Query(value = "UPDATE invitation SET invite_status = :newInviteStatus " +
+            " WHERE invite_id = :inviteId AND recipient_user_id = :recipientUserId", nativeQuery = true)
     int updateInviteStatusByInviteId(
             @Param("newInviteStatus") Character newInviteStatus,
             @Param("inviteId") Long inviteId,
