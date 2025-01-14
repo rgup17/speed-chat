@@ -19,7 +19,7 @@ public class RedisConfig {
         config
                 .setCodec(new JsonJacksonCodec())
                 .useSingleServer()
-                .setAddress("redis://127.0.0.1:6379");
+                .setAddress("redis://redis:6379");
 
         return Redisson.create(config);
     }
