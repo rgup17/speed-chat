@@ -1,0 +1,105 @@
+version: "3"
+
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    command: bash -c "redis-server --appendonly yes"
+    volumes:
+      - redis_data:/data
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: speedchat
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  zookeeper:
+    image: bitnami/zookeeper:latest  # ARM64-compatible image
+    platform: linux/arm64
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - ./data/zookeeper:/data
+  kafka:
+    image: bitnami/kafka:latest  # ARM64-compatible image
+    platform: linux/arm64
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./data/kafka:/var/lib/kafka/data
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "ChatMessages:1:1"
+      KAFKA_ADVERTISED_PORT: 9092
+  sc-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SCAPP_JWT_SECRET=${SCAPP_JWT_SECRET}
+      - SCAPP_PGDB_USER=postgres
+      - SCAPP_PGDB_PASSWORD=${SCAPP_PGDB_PASSWORD}
+      - SCAPP_SMTP_EMAIL=${SCAPP_SMTP_EMAIL}
+      - SCAPP_SMTP_PASSWORD=${SCAPP_SMTP_PASSWORD}
+    depends_on:
+      - redis
+      - postgres
+  sc-socket-1:
+    build:
+      context: ./socket
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8080"
+    environment:
+      - SCAPP_JWT_SECRET=${SCAPP_JWT_SECRET}
+      - SCAPP_SERVER_NAME=CHANNEL_1
+      - SCAPP_REDIS_PASSWORD=${SCAPP_REDIS_PASSWORD}
+      - SCAPP_REDIS_HOST=redis
+    depends_on:
+      - redis
+      - kafka
+  sc-socket-2:
+    build:
+      context: ./socket
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8080"
+    environment:
+      - SERVER_NAME=CHANNEL_2
+      - SCAPP_REDIS_PASSWORD=${SCAPP_REDIS_PASSWORD}
+      - SCAPP_JWT_SECRET=${SCAPP_JWT_SECRET}
+      - SCAPP_REDIS_HOST=redis
+    depends_on:
+      - redis
+      - kafka
+  sc-socket-3:
+    build:
+      context: ./socket
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8080"
+    environment:
+      - SERVER_NAME=CHANNEL_3
+      - SCAPP_REDIS_PASSWORD=${SCAPP_REDIS_PASSWORD}
+      - SCAPP_JWT_SECRET=${SCAPP_JWT_SECRET}
+      - SCAPP_REDIS_HOST=redis
+    depends_on:
+      - redis
+      - kafka
+
+volumes:
+  redis_data:
+  postgres_data:
