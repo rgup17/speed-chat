@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "message")
-public class Message {
+public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long messageId;
@@ -21,7 +20,7 @@ public class Message {
     private Long roomId;
     private Long timestamp;
 
-    public Message(String text, Long userId, Long roomId) {
+    public ChatMessage(String text, Long userId, Long roomId) {
         this.text = text;
         this.userId = userId;
         this.roomId = roomId;

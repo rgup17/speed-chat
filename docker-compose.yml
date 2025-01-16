@@ -50,13 +50,25 @@ services:
       - "8080:8080"
     environment:
       - SCAPP_JWT_SECRET=${SCAPP_JWT_SECRET}
-      - SCAPP_PGDB_USER=postgres
+      - SCAPP_PGDB_USER=${SCAPP_PGDB_USER}
       - SCAPP_PGDB_PASSWORD=${SCAPP_PGDB_PASSWORD}
       - SCAPP_SMTP_EMAIL=${SCAPP_SMTP_EMAIL}
       - SCAPP_SMTP_PASSWORD=${SCAPP_SMTP_PASSWORD}
     depends_on:
       - redis
       - postgres
+  sc-batcher:
+    build:
+      context: ./batcher
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - PGDB_USER=${SCAPP_PGDB_USER}
+      - PGDB_PASSWORD=${SCAPP_PGDB_PASSWORD}
+    depends_on:
+      - postgres
+      - kafka
   sc-socket-1:
     build:
       context: ./socket
